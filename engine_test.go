@@ -16,20 +16,20 @@ func TestEngine(t *testing.T) {
 	}{
 		{
 			desc:       "if page is rendered",
-      pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste"}},
+			pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste"}},
 			expectHTML: "<h1>Hello from React!<div>teste</div></h1>",
 		},
 		{
-			desc:       "teste 2",
-      pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste"}},
-			expectHTML: "<h1>Hello from React!<div>teste</div></h1>",
+			desc:       "if cachec page is rendered",
+			pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste 2"}},
+			expectHTML: "<h1>Hello from React!<div>teste 2</div></h1>",
 		},
 	}
+	e, _ := New(EngineConfig{
+		BasePath:  basepath,
+		PagesPath: "/examples/ssr",
+	})
 	for _, tC := range testCases {
-		e, _ := New(EngineConfig{
-			BasePath:  basepath,
-			PagesPath: "/examples/ssr",
-		})
 		t.Run(tC.desc, func(t *testing.T) {
 			r, err := e.RenderPage(tC.pageConfig)
 			if err != nil {
@@ -56,12 +56,12 @@ func BenchmarkEngine(b *testing.B) {
 	}{
 		{
 			desc:       "if page is rendered",
-			pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem"}},
-			expectHTML: "<h1>Hello from React!</h1>",
+			pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"title": "test"}},
+			expectHTML: "<h1>Hello from React!<div>test</div></h1>",
 		},
 	}
-  b.ResetTimer()
-  b.StartTimer()
+	b.ResetTimer()
+	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		tC := testCases[0]
 		r, err := e.RenderPage(tC.pageConfig)
@@ -71,8 +71,9 @@ func BenchmarkEngine(b *testing.B) {
 		if r.HTML != tC.expectHTML {
 			b.Fatalf("\n expected: %s \n receive: %s", tC.expectHTML, r.HTML)
 		}
+    _ = r
 	}
-  b.StopTimer()
+	b.StopTimer()
 	fmt.Println("\nNumber of iterations: ", b.N)
 	fmt.Println("Elapsed:", b.Elapsed()/time.Duration(b.N))
 }

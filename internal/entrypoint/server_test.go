@@ -7,7 +7,6 @@ import (
 )
 
 func TestGenerateSeverEntryPoint(t *testing.T) {
-	msg, _ := json.Marshal(map[string]string{"message": "message"})
 	testCases := []struct {
 		desc     string
 		imports  []string
@@ -16,30 +15,21 @@ func TestGenerateSeverEntryPoint(t *testing.T) {
 		expect   string
 	}{
 		{
-			desc:     "should add props in entry point",
-			imports:  []string{},
-			filePath: "test.jsx",
-			props:    msg,
-			expect: `const props = {"message":"message"}`,
-		},
-		{
 			desc:     "should add imports in entry point",
 			imports:  []string{`import { testApp } from "test";`},
 			filePath: "test.jsx",
-			props:    msg,
 			expect: `import { testApp } from "test";`,
 		},
 		{
 			desc:     "should add imports in entry point",
 			imports:  []string{`import { testApp } from "test";`},
 			filePath: "../test/test2/test.jsx",
-			props:    msg,
 			expect: `import App from "../test/test2/test.jsx";`,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			result, err := GenerateSeverEntryPoint(tC.imports, tC.filePath, tC.props)
+			result, err := GenerateSeverEntryPoint(tC.imports, tC.filePath)
 			if err != nil {
 				t.Fatalf("failed when expecting #%s \n err: %v", tC.expect, err)
 			}

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"html/template"
 
-	"github.com/rfbatista/gohydrate/internal/page"
+	"github.com/rfbatista/gohydrate/internal/renderer"
 	"github.com/rfbatista/gohydrate/internal/templates"
 )
 
@@ -20,7 +20,7 @@ type Params struct {
 		Type     string
 		Title    string
 	}
-	Page    page.Page
+	Page    renderer.Page
 	RouteID string
 }
 

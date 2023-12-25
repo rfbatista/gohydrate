@@ -7,19 +7,19 @@ import (
 	esbuild "github.com/evanw/esbuild/pkg/api"
 )
 
-func ServerBundler(entryPoint string, pagesDir string, assetsDirPath string) (BuildResult, error) {
+func ClientBundler(entryPoint string, pagesDir string, assetsPath string, isProd bool) (BuildResult, error) {
 	opts := esbuild.BuildOptions{
 		Stdin: &esbuild.StdinOptions{
 			Contents:   entryPoint,
 			Loader:     esbuild.LoaderJSX,
 			ResolveDir: pagesDir,
 		},
-		Platform:   esbuild.PlatformNode,
+		Platform:   esbuild.PlatformBrowser,
 		Bundle:     true,
 		Write:      false,
 		Outdir:     "/",
 		Metafile:   false,
-		AssetNames: fmt.Sprintf("%s/[name]", strings.TrimPrefix(assetsDirPath, "/")),
+		AssetNames: fmt.Sprintf("%s/[name]", strings.TrimPrefix(assetsPath, "/")),
 		Loader: map[string]esbuild.Loader{ // for loading images properly
 			".png":   esbuild.LoaderFile,
 			".svg":   esbuild.LoaderFile,
@@ -33,6 +33,9 @@ func ServerBundler(entryPoint string, pagesDir string, assetsDirPath string) (Bu
 			".eot":   esbuild.LoaderFile,
 		},
 	}
+	opts.MinifyWhitespace = isProd
+	opts.MinifyIdentifiers = isProd
+	opts.MinifySyntax = isProd
 	result := esbuild.Build(opts)
 	if len(result.Errors) > 0 {
 		fileLocation := "unknown"
@@ -53,5 +56,4 @@ func ServerBundler(entryPoint string, pagesDir string, assetsDirPath string) (Bu
 		}
 	}
 	return br, nil
-
 }
