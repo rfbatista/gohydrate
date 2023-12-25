@@ -16,13 +16,13 @@ func TestEngine(t *testing.T) {
 	}{
 		{
 			desc:       "if page is rendered",
-			pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem"}},
-			expectHTML: "<h1>Hello from React!</h1>",
+      pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste"}},
+			expectHTML: "<h1>Hello from React!<div>teste</div></h1>",
 		},
 		{
 			desc:       "teste 2",
-			pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem"}},
-			expectHTML: "<h1>Hello from React!</h1>",
+      pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste"}},
+			expectHTML: "<h1>Hello from React!<div>teste</div></h1>",
 		},
 	}
 	for _, tC := range testCases {
