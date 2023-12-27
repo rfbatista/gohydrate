@@ -7,19 +7,26 @@ import (
 	esbuild "github.com/evanw/esbuild/pkg/api"
 )
 
-func ClientBundler(entryPoint string, pagesDir string, assetsPath string, isProd bool) (BuildResult, error) {
+type ClientBundlerConfig struct {
+	EntryPoint string
+	PagesDir   string
+	AssetsPath string
+	IsProd     bool
+}
+
+func ClientBundler(c ClientBundlerConfig) (BuildResult, error) {
 	opts := esbuild.BuildOptions{
 		Stdin: &esbuild.StdinOptions{
-			Contents:   entryPoint,
+			Contents:   c.EntryPoint,
 			Loader:     esbuild.LoaderJSX,
-			ResolveDir: pagesDir,
+			ResolveDir: c.PagesDir,
 		},
 		Platform:   esbuild.PlatformBrowser,
 		Bundle:     true,
 		Write:      false,
 		Outdir:     "/",
 		Metafile:   false,
-		AssetNames: fmt.Sprintf("%s/[name]", strings.TrimPrefix(assetsPath, "/")),
+		AssetNames: fmt.Sprintf("%s/[name]", strings.TrimPrefix(c.AssetsPath, "/")),
 		Loader: map[string]esbuild.Loader{ // for loading images properly
 			".png":   esbuild.LoaderFile,
 			".svg":   esbuild.LoaderFile,
@@ -33,9 +40,9 @@ func ClientBundler(entryPoint string, pagesDir string, assetsPath string, isProd
 			".eot":   esbuild.LoaderFile,
 		},
 	}
-	opts.MinifyWhitespace = isProd
-	opts.MinifyIdentifiers = isProd
-	opts.MinifySyntax = isProd
+	opts.MinifyWhitespace = c.IsProd
+	opts.MinifyIdentifiers = c.IsProd
+	opts.MinifySyntax = c.IsProd
 	result := esbuild.Build(opts)
 	if len(result.Errors) > 0 {
 		fileLocation := "unknown"

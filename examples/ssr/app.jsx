@@ -1,9 +1,11 @@
 import * as React from "react";
+import { TestComponent } from "./component";
 
 const NavigationBar = (props) => {
   return (
     <h1>
-      Hello from React!<div>{props.title}</div>
+      Hello from React!
+      <TestComponent title={props.title} />
     </h1>
   );
 };

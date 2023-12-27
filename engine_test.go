@@ -9,37 +9,28 @@ import (
 
 func TestEngine(t *testing.T) {
 	basepath, _ := os.Getwd()
-	testCases := []struct {
-		desc       string
-		pageConfig PageConfig
-		expectHTML string
-	}{
-		{
-			desc:       "if page is rendered",
-			pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste"}},
-			expectHTML: "<h1>Hello from React!<div>teste</div></h1>",
-		},
-		{
-			desc:       "if cachec page is rendered",
-			pageConfig: PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste 2"}},
-			expectHTML: "<h1>Hello from React!<div>teste 2</div></h1>",
-		},
-	}
 	e, _ := New(EngineConfig{
 		BasePath:  basepath,
 		PagesPath: "/examples/ssr",
 	})
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			r, err := e.RenderPage(tC.pageConfig)
-			if err != nil {
-				t.Fatalf("failed when expecting #%s \n err: %v", tC.expectHTML, err)
-			}
-			if r.HTML != tC.expectHTML {
-				t.Fatalf("\n expected: %s \n receive: %s", tC.expectHTML, r.HTML)
-			}
-		})
-	}
+	t.Run("should render page", func(t *testing.T) {
+		expect := "<h1>Hello from React!<div>teste</div></h1>"
+		c := PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste"}}
+		r, err := e.RenderPage(c)
+		if err != nil {
+			t.Fatalf("failed")
+		}
+		if r.HTML != expect {
+			t.Fatalf("\n expected: %s \n receive: %s", expect, r.HTML)
+		}
+	})
+	t.Run("should fail if file is not found", func(t *testing.T) {
+		c := PageConfig{Filename: "test.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste 2"}}
+		_, err := e.RenderPage(c)
+		if err == nil {
+			t.Fatalf("should have failed if file is not found")
+		}
+	})
 }
 
 func BenchmarkEngine(b *testing.B) {
@@ -71,7 +62,7 @@ func BenchmarkEngine(b *testing.B) {
 		if r.HTML != tC.expectHTML {
 			b.Fatalf("\n expected: %s \n receive: %s", tC.expectHTML, r.HTML)
 		}
-    _ = r
+		_ = r
 	}
 	b.StopTimer()
 	fmt.Println("\nNumber of iterations: ", b.N)

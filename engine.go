@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/rfbatista/gohydrate/internal/bundler"
 	"github.com/rfbatista/gohydrate/internal/cache"
+	"github.com/rfbatista/gohydrate/internal/hydration"
 	"github.com/rfbatista/gohydrate/internal/renderer"
 	"github.com/rfbatista/logger"
 )
@@ -34,8 +34,10 @@ func New(c EngineConfig) (*Engine, error) {
 		to = os.Stdout
 	}
 	mng := cache.New()
-	log, _ := logger.New(logger.LoggerConfig{WriteTo: to, LogLevel: logger.Error})
-	return &Engine{isProd: c.IsProd, PagesPath: c.PagesPath, cacheManager: mng, BasePath: c.BasePath, log: log, errorPage: []byte("failed to render page"), AssetsPath: c.AssetsPath}, nil
+	log, _ := logger.New(logger.LoggerConfig{WriteTo: to, LogLevel: logger.Debug, WithDateTime: true})
+	e := &Engine{isProd: c.IsProd, PagesPath: c.PagesPath, cacheManager: mng, BasePath: c.BasePath, log: log, errorPage: []byte("failed to render page"), AssetsPath: c.AssetsPath}
+	log.Info(fmt.Sprintf("loading pages from %s", e.PagesFullPath()))
+	return e, nil
 }
 
 type Engine struct {
@@ -49,35 +51,56 @@ type Engine struct {
 }
 
 func (e *Engine) RenderPage(c PageConfig) (*renderer.Page, error) {
-	fp := filepath.Join(e.PagesFullPath(), c.Filename)
-	var props json.RawMessage
-	var err error
+	fullPath := filepath.Join(e.PagesFullPath(), c.Filename)
+	var props string
 	if c.Props != nil {
-		props, err = json.Marshal(c.Props)
+		rawProps, err := json.Marshal(c.Props)
 		if err != nil {
-			e.log.Error(err.Error())
+			e.log.Error(fmt.Sprintf("failed to marshal props for page %s : %s", c.Filename, err))
 			return nil, err
 		}
-
+		props = string(rawProps)
 	}
-	severBuildChan := make(chan serverBuild)
-	clientBuildChan := make(chan clientBuild)
-	go e.buildServer(c, props, fp, &severBuildChan)
-	go e.buildClient(c, props, fp, &clientBuildChan)
+	severBuildChan := make(chan hydration.ServerBuild)
+	clientBuildChan := make(chan hydration.ClientBuild)
+	go hydration.HydrateClient(
+		hydration.HydrateClientConfig{
+			Log:           *e.log,
+			CacheManager:  e.cacheManager,
+			PagesFullPath: e.PagesFullPath(),
+			AssetsPath:    e.AssetsPath,
+			Filename:      c.Filename,
+			Fullpath:      fullPath,
+			Result:        &clientBuildChan,
+			Props:         props,
+			IsProd:        e.isProd,
+		},
+	)
+	go hydration.RenderServerHTML(
+		hydration.RenderServerHTMLConfig{
+			Log:           *e.log,
+			CacheManager:  e.cacheManager,
+			PagesFullPath: e.PagesFullPath(),
+			AssetsPath:    e.AssetsPath,
+			Filename:      c.Filename,
+			FileFullPath:  fullPath,
+			Result:        &severBuildChan,
+			Props:         props,
+		},
+	)
 	serverBuild := <-severBuildChan
 	clientBuild := <-clientBuildChan
+	if serverBuild.Error != nil {
+		e.log.Error(fmt.Sprintf("failed to build server \n %s", serverBuild.Error))
+		return nil, serverBuild.Error
+	}
+	if clientBuild.Error != nil {
+		e.log.Error(fmt.Sprintf("failed to build client \n %s", clientBuild.Error))
+		return nil, clientBuild.Error
+	}
 	return &renderer.Page{HTML: serverBuild.HTML, CSS: serverBuild.CSS, JS: clientBuild.JS}, nil
 }
 
 func (e *Engine) PagesFullPath() string {
 	return filepath.Join(e.BasePath, e.PagesPath)
-}
-
-func (e *Engine) AddProps(b bundler.BuildResult, props interface{}) bundler.BuildResult {
-	if props != nil {
-		propsJson, _ := json.Marshal(&props)
-		b.JS = fmt.Sprintf(`var props = %s; %s`, string(propsJson), b.JS)
-	}
-	return b
-
 }

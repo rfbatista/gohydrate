@@ -1,6 +1,7 @@
 package renderer
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -26,7 +27,7 @@ func CreatePage(jsPath string, b bundler.BuildResult) (*Page, error) {
 	cmd.Stderr = stdErr
   err = cmd.Run()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("page creation has failed \n %s \n %s", err, stdErr)
 	}
 	htmlFile := stdOut.String()
 	return &Page{
