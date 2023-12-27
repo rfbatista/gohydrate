@@ -13,9 +13,20 @@ func TestEngine(t *testing.T) {
 		BasePath:  basepath,
 		PagesPath: "/examples/ssr",
 	})
-	t.Run("should render page", func(t *testing.T) {
+	t.Run("should render page with props", func(t *testing.T) {
 		expect := "<h1>Hello from React!<div>teste</div></h1>"
 		c := PageConfig{Filename: "app.jsx", Props: map[string]string{"mensage": "test mensagem", "title": "teste"}}
+		r, err := e.RenderPage(c)
+		if err != nil {
+			t.Fatalf("failed")
+		}
+		if r.HTML != expect {
+			t.Fatalf("\n expected: %s \n receive: %s", expect, r.HTML)
+		}
+	})
+	t.Run("should render page without props", func(t *testing.T) {
+		expect := "<h1>Hello from React!<div></div></h1>"
+		c := PageConfig{Filename: "app.jsx", Props: nil}
 		r, err := e.RenderPage(c)
 		if err != nil {
 			t.Fatalf("failed")

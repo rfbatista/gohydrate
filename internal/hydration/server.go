@@ -49,10 +49,10 @@ func RenderServerHTML(
 		c.CacheManager.SaveServerBuild(c.Filename, b)
 	}
 	jsPath := filepath.Join(c.PagesFullPath, "build/index.js")
-	if c.Props != "" {
-		b.JS = fmt.Sprintf(`var props = %s; %s`, c.Props, b.JS)
+	if c.Props == "" {
+		c.Props = "{}"
 	}
-  c.Log.Debug(jsPath)
+	b.JS = fmt.Sprintf(`var props = %s; %s`, c.Props, b.JS)
 	p, err := renderer.CreatePage(jsPath, b)
 	if err != nil {
 		c.Log.Error(fmt.Sprintf("failed to render server page from bundler \n %s", err))

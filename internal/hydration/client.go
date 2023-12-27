@@ -52,10 +52,11 @@ func HydrateClient(c HydrateClientConfig) {
 		c.CacheManager.SaveServerBuild(c.Filename, b)
 	}
 	jsPath := filepath.Join(c.PagesFullPath, "build/index.js")
-	if c.Props != "" {
-		b.JS = fmt.Sprintf(`var props = %s; %s`, c.Props, b.JS)
-		c.Log.Info("adding props")
+	if c.Props == "" {
+		c.Props = "{}"
 	}
+	b.JS = fmt.Sprintf(`var props = %s; %s`, c.Props, b.JS)
+	c.Log.Info("adding props")
 	c.Log.Debug("rendering page from JS asset")
 	p, err := renderer.CreatePage(jsPath, b)
 	if err != nil {
