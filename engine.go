@@ -13,6 +13,8 @@ import (
 	"github.com/rfbatista/logger"
 )
 
+
+
 type EngineConfig struct {
 	BasePath   string
 	LogTo      io.Writer
@@ -34,7 +36,7 @@ func New(c EngineConfig) (*Engine, error) {
 		to = os.Stdout
 	}
 	mng := cache.New()
-	log, _ := logger.New(logger.LoggerConfig{WriteTo: to, LogLevel: logger.Debug, WithDateTime: true})
+	log, _ := logger.New(logger.LoggerConfig{WriteTo: to, LogLevel: logger.ErrorLevel, WithDateTime: true})
 	e := &Engine{isProd: c.IsProd, PagesPath: c.PagesPath, cacheManager: mng, BasePath: c.BasePath, log: log, errorPage: []byte("failed to render page"), AssetsPath: c.AssetsPath}
 	log.Info(fmt.Sprintf("loading pages from %s", e.PagesFullPath()))
 	return e, nil

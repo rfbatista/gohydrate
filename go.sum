@@ -1,6 +1,6 @@
 github.com/evanw/esbuild v0.19.9 h1:Sj5b1Q+oFIX1yPfF9BNZpNSzAhoUP4h5rPWq/1RZFVE=
 github.com/evanw/esbuild v0.19.9/go.mod h1:D2vIQZqV/vIf/VRHtViaUtViZmG7o+kKmlBfVQuRi48=
-github.com/rfbatista/logger v0.1.0 h1:zVzQIm3ElS09C7fIO5Uf50RbJWsf7obDW4uWMU0XaQY=
-github.com/rfbatista/logger v0.1.0/go.mod h1:BdsQO6LWCNN2joBQ+TpxeFfnoVj1pqwbWWJfHD1syms=
+github.com/rfbatista/logger v0.2.0 h1:5z3qcayFP3esKjZNw/UaLHz0Fndp32kGKTurb1j9Yb8=
+github.com/rfbatista/logger v0.2.0/go.mod h1:BdsQO6LWCNN2joBQ+TpxeFfnoVj1pqwbWWJfHD1syms=
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 h1:0A+M6Uqn+Eje4kHMK80dtF3JCXC4ykBgQG4Fe06QRhQ=
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
