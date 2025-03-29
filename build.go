@@ -5,9 +5,10 @@ import (
 )
 
 type BuildOptions struct {
-	PagePath   string
+	PagePath    string
 	EntryPoints []string
 	Outdir      string
+	Minify      bool
 }
 
 func BuildPages(o BuildOptions) error {
@@ -16,7 +17,12 @@ func BuildPages(o BuildOptions) error {
 		Outdir:      o.Outdir,
 		Bundle:      true,
 		Write:       true,
-		LogLevel:    api.LogLevelInfo,
+
+		MinifyWhitespace:  o.Minify, // Removes unnecessary whitespace
+		MinifyIdentifiers: o.Minify, // Shortens variable & function names
+		MinifySyntax:      o.Minify, // Optimizes syntax
+
+		LogLevel: api.LogLevelInfo,
 		Loader: map[string]api.Loader{ // for loading images properly
 			".png":   api.LoaderFile,
 			".svg":   api.LoaderFile,
